@@ -1,25 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/karma/karma-backend/internal/config"
 	"github.com/karma/karma-backend/pkg/api/routes"
+
+	"github.com/karma/karma-backend/internal/config"
+	"github.com/karma/karma-backend/pkg/api/middlewares"
 )
 
 func main() {
-	jsonData, err := config.LoadData()
 
-	fmt.Print(jsonData)
-
+	// Load env variables.
+	err := config.LoadEnv()
 	if err != nil {
-		log.Fatalf("Error with config %v", err)
+		log.Fatalf(err.Error())
 		return
 	}
 
 	router := gin.Default()
+
+	// Apply MongoDB middleware to all routes in taskApiGroup
+	router.Use(middlewares.MongoDBMiddleware())
+
 	taskApiGroup := router.Group("/api")
 
 	routes.SetupTaskRoutes(taskApiGroup)
